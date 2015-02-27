@@ -448,6 +448,34 @@ number at the point."
         -1
       1)))
 
+(defun popup-window-full-width-p (&optional window)
+  "A portable version of `window-full-width-p'."
+  (if (fboundp 'window-full-width-p)
+      (window-full-width-p window)
+    (= (window-width window) (frame-width (window-frame (or window (selected-window)))))))
+
+(defun popup-truncated-partial-width-window-p (&optional window)
+  "A portable version of `truncated-partial-width-window-p'."
+  (unless window
+    (setq window (selected-window)))
+  (unless (popup-window-full-width-p window)
+    (let ((t-p-w-w (buffer-local-value 'truncate-partial-width-windows
+                                       (window-buffer window))))
+      (if (integerp t-p-w-w)
+          (< (window-width window) t-p-w-w)
+        t-p-w-w))))
+
+(defun popup-current-physical-column ()
+  "Return the current physical column."
+  (or (when (and popup-use-optimized-column-computation
+                 (eq (window-hscroll) 0))
+        (let ((current-column (current-column)))
+          (if (or (popup-truncated-partial-width-window-p)
+                  truncate-lines
+                  (< current-column (window-width)))
+              current-column)))
+      (car (posn-col-row (posn-at-point)))))
+
 (cl-defun popup-create (point
                         width
                         height
@@ -509,7 +537,9 @@ KEYMAP is a keymap that will be put on the popup contents."
     (setq width (min width (popup-calculate-max-width max-width))))
   (save-excursion
     (goto-char point)
-    (let* ((col-row (posn-col-row (posn-at-point)))
+    (let* (;; (col-row (posn-col-row (posn-at-point)))
+           (col-row (cons (popup-current-physical-column)
+                          (line-number-at-pos)))
            (row (cdr col-row))
            (column (car col-row))
            (overlays (make-vector height nil))
@@ -584,7 +614,8 @@ KEYMAP is a keymap that will be put on the popup contents."
                         (push (list ov (overlay-get ov 'display)) invis-overlays)
                         (overlay-put ov 'display "")))
           (setq around t)
-          (setq current-column (car (posn-col-row (posn-at-point))))
+          ;; (setq current-column (car (posn-col-row (posn-at-point))))
+          (setq current-column (1- (popup-current-physical-column)))
 
           (when (< current-column column)
             ;; Extend short buffer lines by popup prefix (line of spaces)
