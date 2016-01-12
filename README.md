@@ -28,7 +28,7 @@ Screenshots
 Installation
 ------------
 
-You can install `popup.el` from [MELPA](http://melpa.org/) with package.el.
+You can install `popup.el` from [MELPA](https://melpa.org/) with package.el.
 popwin is tested under GNU Emacs 24 or later.
 
 Popup Items
@@ -273,13 +273,14 @@ select an item of a list.
 
     popup-menu* list &key point around width height margin margin-left
     margin-right scroll-bar symbol parent parent-offset keymap
-    fallback help-delay nowait prompt isearch isearch-cursor-color
+    fallback help-delay nowait prompt isearch isearch-filter isearch-cursor-color
     isearch-keymap isearch-callback initial-index => selected-value
 
 Show a popup menu of `LIST` at `POINT`. This function returns the value
 of the selected item. Almost all arguments are same as `popup-create`
 except for `KEYMAP`, `FALLBACK`, `HELP-DELAY`, `PROMPT`, `ISEARCH`,
-`ISEARCH-CURSOR-COLOR`, `ISEARCH-KEYMAP`, and `ISEARCH-CALLBACK`.
+`ISEARCH-FILTER`, `ISEARCH-CURSOR-COLOR`, `ISEARCH-KEYMAP`
+and `ISEARCH-CALLBACK`.
 
 If `KEYMAP` is provided, it is a keymap which is used when processing
 events during event loop.
@@ -298,6 +299,9 @@ instance without entering event loop.
 
 If `ISEARCH` is non-nil, do isearch as soon as displaying the popup
 menu.
+
+`ISEARCH-FILTER` is a filtering function taking two arguments:
+search pattern and list of items. Returns a list of matching items.
 
 `ISEARCH-CURSOR-COLOR` is a cursor color during isearch. The default
 value is `popup-isearch-cursor-color'.
@@ -330,11 +334,20 @@ Here is an example:
 
     (popup-cascade-menu '(("Top1" "Sub1" "Sub2") "Top2"))
 
+
+### Customize Variables
+
+#### `popup-isearch-regexp-builder-function`
+
+Function used to construct a regexp from a pattern. You may for instance
+provide a function that replaces spaces by '.+' if you like helm or ivy style
+of completion. Default value is `#'regexp-quote`.
+
 ----
 
 Copyright (C) 2011-2015  Tomohiro Matsuyama <<m2ym.pub@gmail.com>>
 
-[melpa-link]: http://melpa.org/#/popup
-[melpa-stable-link]: http://stable.melpa.org/#/popup
-[melpa-badge]: http://melpa.org/packages/popup-badge.svg
-[melpa-stable-badge]: http://stable.melpa.org/packages/popup-badge.svg
+[melpa-link]: https://melpa.org/#/popup
+[melpa-stable-link]: https://stable.melpa.org/#/popup
+[melpa-badge]: https://melpa.org/packages/popup-badge.svg
+[melpa-stable-badge]: https://stable.melpa.org/packages/popup-badge.svg
